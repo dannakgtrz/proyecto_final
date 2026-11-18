@@ -1,0 +1,226 @@
+/* Estilos de la sección "Diagnóstico de WebGPU".
+   Usa las variables de color definidas en main.css. */
+
+.diagnostics {
+  margin-top: 2.5rem;
+}
+
+.diag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.diag-header h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.5rem;
+  color: var(--color-acento);
+}
+
+.btn {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--color-acento);
+  border-radius: 6px;
+  background: var(--color-acento);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  background: #17304f;
+}
+
+.btn:focus-visible {
+  outline: 3px solid #9ec5fe;
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+/* Estado general */
+.overall {
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid;
+  margin-bottom: 1.25rem;
+}
+
+.overall p {
+  margin: 0.25rem 0 0;
+}
+
+.overall--ok {
+  background: var(--color-ok-fondo);
+  border-color: #b5dcc2;
+  color: var(--color-ok-texto);
+}
+
+.overall--failed {
+  background: #fdeaea;
+  border-color: #f0bcbc;
+  color: #8a1f1f;
+}
+
+/* Pasos: soporte, adaptador, dispositivo */
+.stages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.stage {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-top-width: 4px;
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+}
+
+.stage--ok {
+  border-top-color: #2e8b57;
+}
+
+.stage--failed {
+  border-top-color: #c0392b;
+}
+
+.stage--skipped {
+  border-top-color: #9aa5b1;
+}
+
+.stage h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.stage p {
+  margin: 0.6rem 0 0;
+  font-size: 0.9rem;
+  color: var(--color-secundario);
+  overflow-wrap: anywhere;
+}
+
+.badge--failed {
+  background: #fdeaea;
+  color: #8a1f1f;
+}
+
+.badge--skipped {
+  background: #eceff3;
+  color: var(--color-secundario);
+}
+
+/* Información técnica */
+.block-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+  color: var(--color-acento);
+}
+
+.diagnostics .card {
+  margin-bottom: 1rem;
+  padding: 1rem 1.5rem 1.25rem;
+}
+
+.diagnostics .card h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.diagnostics .info-row dd {
+  overflow-wrap: anywhere;
+}
+
+.subsection {
+  margin-top: 0.75rem;
+}
+
+.subsection h4 {
+  font-size: 0.9rem;
+  color: var(--color-secundario);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  background: var(--color-fondo);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.8rem;
+}
+
+.table-wrap {
+  max-height: 22rem;
+  overflow: auto;
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+th,
+td {
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--color-borde);
+  text-align: left;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-fondo);
+  color: var(--color-secundario);
+}
+
+th.num,
+td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+code {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.82rem;
+}
+
+.muted {
+  margin: 0;
+  color: var(--color-secundario);
+  font-size: 0.9rem;
+}
+
+.meta {
+  margin: 1rem 0 0;
+  color: var(--color-secundario);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .stages {
+    grid-template-columns: 1fr;
+  }
+}
+
