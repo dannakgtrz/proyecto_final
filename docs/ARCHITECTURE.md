@@ -7,20 +7,27 @@ C:\proyecto_final
 ├── src/
 │   ├── components/
 │   │   ├── ProjectCard.ts
-│   │   └── WebGPUDiagnostics.ts
+│   │   ├── WebGPUDiagnostics.ts
+│   │   └── VectorAddDemo.ts
+│   ├── shaders/
+│   │   └── vectorAdd.wgsl
 │   ├── styles/
 │   │   ├── main.css
-│   │   └── diagnostics.css
+│   │   ├── diagnostics.css
+│   │   └── vectorAdd.css
 │   ├── utils/
 │   │   ├── environment.ts
 │   │   ├── text.ts
 │   │   ├── webgpuSupport.ts
 │   │   ├── webgpuDevice.ts
 │   │   ├── webgpuInfo.ts
-│   │   └── webgpuDiagnostics.ts
+│   │   ├── webgpuDiagnostics.ts
+│   │   └── vectorAdd.ts
 │   ├── types/
 │   │   ├── project.ts
-│   │   └── webgpu.ts
+│   │   ├── webgpu.ts
+│   │   ├── webgpu-globals.d.ts
+│   │   └── vectorAdd.ts
 │   └── main.ts
 ├── public/
 ├── docs/
@@ -37,10 +44,11 @@ C:\proyecto_final
 | Directorio | Responsabilidad | Contenido actual |
 |---|---|---|
 | `src/` | Todo el código fuente de la aplicación. | — |
-| `src/components/` | Funciones que generan partes de la interfaz. | `ProjectCard.ts` (página inicial) y `WebGPUDiagnostics.ts` (diagnóstico). |
-| `src/styles/` | Hojas de estilo CSS. | `main.css` (globales) y `diagnostics.css` (sección de diagnóstico). |
-| `src/utils/` | Lógica y funciones auxiliares, sin HTML. | Módulos de WebGPU (ver más abajo), `environment.ts` y `text.ts`. |
-| `src/types/` | Definiciones de tipos de TypeScript. | `project.ts` y `webgpu.ts`. |
+| `src/components/` | Funciones que generan partes de la interfaz. | `ProjectCard.ts` (página inicial), `WebGPUDiagnostics.ts` (diagnóstico) y `VectorAddDemo.ts` (suma vectorial). |
+| `src/shaders/` | Código de shaders en WGSL ejecutados en la GPU. | `vectorAdd.wgsl` (shader de cómputo para suma vectorial). |
+| `src/styles/` | Hojas de estilo CSS. | `main.css` (globales), `diagnostics.css` (diagnóstico) y `vectorAdd.css` (operación paralela). |
+| `src/utils/` | Lógica y funciones auxiliares, sin HTML. | Módulos de WebGPU, `vectorAdd.ts` (pipeline y CPU ref), `environment.ts` y `text.ts`. |
+| `src/types/` | Definiciones de tipos de TypeScript. | `project.ts`, `webgpu.ts`, `webgpu-globals.d.ts` y `vectorAdd.ts`. |
 | `public/` | Archivos estáticos que se sirven tal cual, sin procesar. | `favicon.svg`. |
 | `docs/` | Documentación del proyecto. | Entorno, arquitectura y hoja de ruta. |
 
@@ -64,7 +72,8 @@ index.html ──carga──▶ src/main.ts ──usa──▶ utils/environment
                           ├──usa──▶ components/ProjectCard.ts  (genera el HTML)
                           ├──usa──▶ types/project.ts           (forma de los datos)
                           ├──importa──▶ styles/main.css
-                          └──monta──▶ components/WebGPUDiagnostics.ts  (etapa 2)
+                          ├──monta──▶ components/WebGPUDiagnostics.ts  (etapa 2)
+                          └──monta──▶ components/VectorAddDemo.ts      (etapa 3)
 ```
 
 ## Integración de WebGPU (etapa 2)
@@ -120,3 +129,54 @@ objeto WebGPUDiagnostic  ──▶  pantalla                               (WebG
 - **Sin dependencias de ejecución:** solo `vite` y `typescript`, ambas de desarrollo.
 - **Carpetas por responsabilidad:** separar código, estilos, tipos y utilidades facilita crecer sin desorden.
 
+
+
+## Primer shader de cómputo en WGSL (etapa 3)
+
+La etapa 3 implementa la primera operación matemática paralela ejecutada directamente en la GPU: la suma de vectores element-wise ($C = A + B$).
+
+### Flujo de ejecución del cómputo paralelo
+
+```text
+[CPU Host: TypeScript]
+   │
+   ├── 1. Prepara vectores en memoria principal (Float32Array)
+   ├── 2. Crea GPUBuffer (STORAGE, COPY_DST, COPY_SRC, MAP_READ)
+   ├── 3. Transfiere datos a la VRAM: device.queue.writeBuffer()
+   ├── 4. Compila shader WGSL: device.createShaderModule()
+   ├── 5. Define BindGroupLayout y crea ComputePipeline
+   ├── 6. Vincula buffers reales: device.createBindGroup()
+   ├── 7. Graba comandos en CommandEncoder (beginComputePass -> dispatchWorkgroups)
+   ├── 8. Ordena copia GPU->Staging: copyBufferToBuffer()
+   ├── 9. Envía comandos a la GPU: device.queue.submit()
+   │
+[GPU Device: WGSL Compute Shader]
+   │  Despacho masivo en paralelo:
+   │  N invocaciones concurrentes distribuidas en workgroups de 64 hilos.
+   │  Cada hilo calcula: vectorC[global_id.x] = vectorA[global_id.x] + vectorB[global_id.x]
+   │
+[CPU Host: Lectura Asíncrona]
+   │
+   ├── 10. Mapea staging buffer: stagingBuffer.mapAsync(GPUMapMode.READ)
+   ├── 11. Lee rango de memoria: stagingBuffer.getMappedRange()
+   ├── 12. Clona a Float32Array y desmapea: stagingBuffer.unmap()
+   ├── 13. Destruye buffers para liberar VRAM: buffer.destroy()
+   └── 14. Valida numéricamente frente al cálculo de referencia en TypeScript.
+```
+
+### Modelo de memoria y buffers
+
+En WebGPU la memoria de la GPU no es directamente legible por la CPU si se encuentra configurada para operaciones de cómputo de alta velocidad (VRAM dedicada). Por ello se utilizan dos categorías de búferes:
+
+1. **Storage Buffers (VRAM interna de la GPU):**
+   - `vectorA` y `vectorB`: `GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST`. El shader los lee (`var<storage, read>`) y la CPU escribe en ellos al inicio (`writeBuffer`).
+   - `vectorC`: `GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC`. El shader escribe en él (`var<storage, read_write>`) y la GPU permite usarlo como origen de copia hacia el staging buffer.
+
+2. **Staging Buffer (Búfer de paso accesible por la CPU):**
+   - `stagingBuffer`: `GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST`. No puede ser enlazado directamente a un compute shader, pero permite el mapeo asíncrono hacia el espacio de direcciones de JavaScript mediante `mapAsync()`.
+
+### Jerarquía de ejecución paralela: Invocaciones y Workgroups
+
+- **Invocación (Invocation / Thread):** La ejecución individual del shader para un único elemento. Cada invocación obtiene su índice unívoco mediante `@builtin(global_invocation_id) global_id: vec3<u32>`.
+- **Grupo de trabajo (Workgroup):** Conjunto cooperativo de hilos que se ejecutan juntos en la misma unidad de cómputo (Compute Unit). Se definió `@workgroup_size(64, 1, 1)`.
+- **Despacho (Dispatch):** Se calcula $\lceil N / 64 \rceil$. Para $N=5$ se despacha 1 grupo (64 hilos creados). El control de límites `if (index >= arrayLength(&vectorA.values)) return;` descarta inmediatamente las 59 invocaciones sobrantes. Para $N=1000$ se despachan 16 grupos (1024 hilos creados).

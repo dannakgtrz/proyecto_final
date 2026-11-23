@@ -107,3 +107,26 @@ Solo el caso del adaptador no disponible ocurrió realmente en el navegador; los
 - **Herramientas de captura:** con `--dump-dom` y `--screenshot` de Chrome el diagnóstico a veces aparecía sin terminar, porque esas opciones no esperan a la GPU. Por eso se usó el protocolo de depuración, que sí espera. No es un fallo de la aplicación.
 - **Puerto 5173 ocupado** durante las pruebas: Vite usó el 5174 automáticamente.
 
+
+## Resultados de las pruebas de la etapa 3 (Suma vectorial paralela)
+
+Pruebas ejecutadas el 23/11/2026 con Chrome 157 sobre la GPU integrada Intel Iris Xe Graphics.
+
+### 1. Caso base (5 elementos)
+- **Vector A:** `[1, 2, 3, 4, 5]`
+- **Vector B:** `[10, 20, 30, 40, 50]`
+- **Esperado (CPU TypeScript):** `[11, 22, 33, 44, 55]`
+- **Calculado (WebGPU WGSL):** `[11, 22, 33, 44, 55]`
+- **Diferencia máxima:** `0.00e+0` (exactitud numérica absoluta).
+- **Grupos de trabajo:** 1 workgroup $\times$ 64 hilos = 64 invocaciones totales (5 activas, 59 descartadas por boundary check).
+- **Validación:** 100% de coincidencia numérica.
+
+### 2. Prueba de escala (1,000 elementos)
+- **Vector A:** $A[i] = i + 1 \quad (i = 0, \dots, 999)$
+- **Vector B:** $B[i] = (i + 1) \times 10 \quad (i = 0, \dots, 999)$
+- **Esperado (CPU TypeScript):** $[11, 22, 33, \dots, 10989, 11000]$
+- **Calculado (WebGPU WGSL):** $[11, 22, 33, \dots, 10989, 11000]$
+- **Diferencia máxima:** `0.00e+0`.
+- **Grupos de trabajo:** 16 workgroups $\times$ 64 hilos = 1,024 invocaciones totales (1,000 activas, 24 descartadas por boundary check).
+- **Validación:** 100% de coincidencia numérica.
+- **Consola del navegador:** 0 errores de validación de WebGPU, 0 advertencias de compilación de pipeline.

@@ -1,12 +1,12 @@
 # Hoja de ruta
 
-Plan de etapas del proyecto. Las etapas 1 y 2 están realizadas; las demás son planes y no están implementadas.
+Plan de etapas del proyecto. Las etapas 1, 2 y 3 están realizadas; las demás son planes y no están implementadas.
 
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | Preparación del entorno y estructura base | Completada |
 | 2 | Introducción a WebGPU y detección del dispositivo GPU | Completada |
-| 3 | Administración de memoria y buffers | Pendiente |
+| 3 | Primer shader de cómputo con WebGPU y WGSL (suma vectorial) | Completada |
 | 4 | Implementación de shaders WGSL | Pendiente |
 | 5 | Regresión lineal y descenso de gradiente | Pendiente |
 | 6 | Implementación vectorizada | Pendiente |
@@ -21,7 +21,7 @@ Plan de etapas del proyecto. Las etapas 1 y 2 están realizadas; las demás son 
 
 1. **Preparación del entorno y estructura base.** Herramientas verificadas, proyecto Vite + TypeScript, carpetas, página inicial y documentación.
 2. **Introducción a WebGPU y detección del dispositivo GPU.** Comprobar que el navegador soporta WebGPU y obtener información del adaptador y dispositivo. *Realizada: diagnóstico en pantalla y pruebas documentadas en `ENVIRONMENT.md`.*
-3. **Administración de memoria y buffers.** Crear buffers en la GPU y transferir datos entre CPU y GPU.
+3. **Primer shader de cómputo con WebGPU y WGSL.** Creación de buffers (STORAGE y STAGING), compilación de shader WGSL, pipeline de cómputo, despacho de workgroups y transferencia asíncrona de resultados CPU-GPU-CPU validados numéricamente. *Realizada.*
 4. **Implementación de shaders WGSL.** Escribir los primeros programas de cómputo en WGSL y ejecutarlos.
 5. **Regresión lineal y descenso de gradiente.** Definir el modelo, la función de pérdida y el algoritmo de entrenamiento.
 6. **Implementación vectorizada.** Llevar el entrenamiento a la GPU con operaciones sobre vectores y matrices.

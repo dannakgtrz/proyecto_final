@@ -8,8 +8,13 @@ Implementar un algoritmo de regresión lineal vectorizada utilizando WebGPU y WG
 
 ## Estado actual
 
-**Etapa 2 completada: diagnóstico de WebGPU.**
-La aplicación muestra una página inicial y una sección «Diagnóstico de WebGPU» que detecta el soporte del navegador, solicita el adaptador y el dispositivo GPU, y presenta sus características y límites. Todavía no incluye regresión lineal, shaders, TensorFlow ni benchmarking. Las etapas siguientes están en [docs/ROADMAP.md](docs/ROADMAP.md).
+**Etapa 3 completada: primer shader de cómputo con WebGPU y WGSL.**
+La aplicación incluye:
+1. Una página inicial descriptiva.
+2. Una sección de diagnóstico de WebGPU con inspección de adaptador, dispositivo, features y límites.
+3. Una sección interactiva de primera operación paralela en WebGPU: suma de dos vectores ($C = A + B$) mediante un shader de cómputo WGSL, contrastada frente a una implementación de referencia en TypeScript (con pruebas de 5 y 1,000 elementos).
+
+Todavía no incluye regresión lineal, descenso de gradiente, TensorFlow ni benchmarking formal. Las etapas siguientes están en [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Tecnologías
 

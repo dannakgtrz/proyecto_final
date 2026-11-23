@@ -1,8 +1,10 @@
 import "./styles/main.css";
 import "./styles/diagnostics.css";
+import "./styles/vectorAdd.css";
 import packageJson from "../package.json";
 import { renderProjectCard } from "./components/ProjectCard";
 import { mountWebGPUDiagnostics } from "./components/WebGPUDiagnostics";
+import { mountVectorAddDemo } from "./components/VectorAddDemo";
 import { getEnvironmentStatus } from "./utils/environment";
 import type { ProjectInfo } from "./types/project";
 
@@ -26,5 +28,11 @@ if (app) {
   diagnostics.className = "diagnostics";
   app.appendChild(diagnostics);
   mountWebGPUDiagnostics(diagnostics);
+
+  // Sección de primera operación paralela en WebGPU (etapa 3).
+  const vectorAddSection = document.createElement("section");
+  vectorAddSection.className = "vector-add-demo";
+  app.appendChild(vectorAddSection);
+  mountVectorAddDemo(vectorAddSection);
 }
 
